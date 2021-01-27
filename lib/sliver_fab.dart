@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// A helper class if you want a FloatingActionButton to be pinned in the FlexibleAppBar
-class SliverFab extends StatefulWidget {
+class SliverFAB extends StatefulWidget {
   ///List of slivers placed in CustomScrollView
   final List<Widget> slivers;
 
@@ -22,12 +22,16 @@ class SliverFab extends StatefulWidget {
   ///Position of the widget.
   final FloatingPosition floatingPosition;
 
-  SliverFab({
+  ///Handle zoom offset.
+  final bool isStretchModeZoom;
+
+  SliverFAB({
     @required this.slivers,
     @required this.floatingWidget,
     this.floatingPosition = const FloatingPosition(right: 16.0),
     this.expandedHeight = 256.0,
     this.topScalingEdge = 96.0,
+    this.isStretchModeZoom = false,
   }) {
     assert(slivers != null);
     assert(floatingWidget != null);
@@ -38,17 +42,17 @@ class SliverFab extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return new SliverFabState();
+    return SliverFABState();
   }
 }
 
-class SliverFabState extends State<SliverFab> {
+class SliverFABState extends State<SliverFAB> {
   ScrollController scrollController;
 
   @override
   void initState() {
     super.initState();
-    scrollController = new ScrollController();
+    scrollController = ScrollController();
     scrollController.addListener(() => setState(() {}));
   }
 
@@ -86,7 +90,12 @@ class SliverFabState extends State<SliverFab> {
     double scale = 1.0;
     if (scrollController.hasClients) {
       double offset = scrollController.offset;
-      top -= offset > 0 ? offset : 0;
+
+      if (!widget.isStretchModeZoom) {
+        top -= offset > 0 ? offset : 0;
+      } else {
+        top -= offset > 0 ? offset : offset;
+      }
       if (offset < scale1edge) {
         scale = 1.0;
       } else if (offset > scale0edge) {
@@ -100,8 +109,8 @@ class SliverFabState extends State<SliverFab> {
       top: top,
       right: widget.floatingPosition.right,
       left: widget.floatingPosition.left,
-      child: new Transform(
-        transform: new Matrix4.identity()..scale(scale, scale),
+      child: Transform(
+        transform: Matrix4.identity()..scale(scale, scale),
         alignment: Alignment.center,
         child: widget.floatingWidget,
       ),
